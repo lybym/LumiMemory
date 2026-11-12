@@ -212,12 +212,16 @@ export class MemoryStore {
   correct(spaceId: string, actor: Actor, oldId: string, input: {
     claim: string; evidenceId: string;
   }): { id: string; status: 'confirmed' } {
-    this.authorized(spaceId, actor, 'write');
+    const space = this.authorized(spaceId, actor, 'write');
     if (actor.kind !== 'human') throw new MemoryError('human_confirmation_required', 403);
     const old = record(this.db.prepare('SELECT * FROM memories WHERE id=? AND space_id=?')
       .get(oldId, spaceId) as MemoryRow | undefined);
     if (old.status !== 'confirmed') throw new MemoryError('wrong_state', 409);
     const claim = required(input.claim, 1200);
+    if (space.policy_pack === 'child-guarded' &&
+        /(?:诊断为|患有抑郁|患有焦虑症|智商为|人格障碍|diagnosed with|iq score)/i.test(claim)) {
+      throw new MemoryError('protected_inference', 403);
+    }
     if (claim === old.claim) throw new MemoryError('claim_unchanged', 409);
     const evidence = this.db.prepare('SELECT * FROM evidence WHERE id=? AND space_id=?')
       .get(input.evidenceId, spaceId) as EvidenceRow | undefined;

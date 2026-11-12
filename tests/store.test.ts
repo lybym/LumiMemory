@@ -82,3 +82,14 @@ test('evidence expiration redacts raw text, preventing future proposals', () => 
     kind:'fact', claim:'foo', evidenceId:ev.id }), /invalid_evidence/);
   store.close();
 });
+
+test('child policy applies to corrections as well as proposals', () => {
+  const { store, space, evidence } = fixture('child-guarded');
+  const item = store.propose(space.id, parent, { subjectId:'person-a',
+    kind:'preference', claim:'喜欢恐龙', evidenceId:evidence.id });
+  store.confirm(space.id, parent, item.id);
+  assert.throws(() => store.correct(space.id, parent, item.id,
+    { claim:'孩子诊断为抑郁症', evidenceId:evidence.id }), /protected_inference/);
+  assert.equal(store.recall(space.id, parent, '恐龙').length, 1);
+  store.close();
+});
