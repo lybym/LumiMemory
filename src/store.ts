@@ -27,8 +27,12 @@ type MemoryRow = {
 };
 
 export class MemoryError extends Error {
-  constructor(public code: string, public status = 400) {
+  code: string;
+  status: number;
+  constructor(code: string, status = 400) {
     super(code);
+    this.code = code;
+    this.status = status;
     this.name = 'MemoryError';
   }
 }
@@ -52,7 +56,9 @@ function record<T>(value: T | undefined, code = 'not_found'): T {
 
 export class MemoryStore {
   private db: DatabaseSync;
-  constructor(path = ':memory:', private now: () => string = () => new Date().toISOString()) {
+  private now: () => string;
+  constructor(path = ':memory:', now: () => string = () => new Date().toISOString()) {
+    this.now = now;
     this.db = new DatabaseSync(path);
     this.db.exec('PRAGMA foreign_keys = ON;');
     this.db.exec('PRAGMA journal_mode = WAL;');
