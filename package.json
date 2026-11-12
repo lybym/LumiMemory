@@ -1,0 +1,13 @@
+{
+  "name": "lumimemory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-grounded, policy-governed personal memory for AI agents",
+  "engines": {"node": ">=24"},
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test tests/*.test.ts",
+    "check": "node --check src/store.ts && node --check src/server.ts && node --check src/main.ts"
+  }
+}
